@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1 id="status">停止中</h1>
+    <h2 id="timer">30.0</h2>
+    <button id="btn" style="padding:20px; font-size:20px;">スタート</button>
+    <p>1 尻 足反対<p>
+    <p>2 尻 あぐら<p>
+    <p>3 片足 ももうら<p>
+    <p>4 45度 内転筋<p>
+    <p>5 両足 ももうら<p>
+    <p>6 脚真横 同じ手<p>
+    <p>7 脚真横 反対手<p>
+    <p>8 両足 合わせ<p>
+    <p>9 開脚ほぐし<p>
+    <p>10 開脚肘<p>
+    <p>11 開脚<p>
+    
+    <script>
+        let timeLeft = 30;
+        let isWorking = true;
+        let timerId = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function beep(f, d) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g); g.connect(audioCtx.destination);
+            o.frequency.value = f;
+            g.gain.setValueAtTime(1.0, audioCtx.currentTime);
+            o.start(); o.stop(audioCtx.currentTime + d);
+        }
+
+        document.getElementById('btn').onclick = function() {
+            if (timerId) return; // 二重起動防止
+            audioCtx.resume();
+            beep(660, 0.2); // 動作確認用の音
+            
+            this.innerText = "実行中...";
+            document.getElementById('status').innerText = "ワーク中";
+
+            timerId = setInterval(() => {
+                timeLeft = Math.round((timeLeft - 0.1) * 10) / 10;
+                
+                // 3秒前からのカウントダウン音
+                if (isWorking && [3, 2, 1].includes(Math.ceil(timeLeft)) && (Math.round(timeLeft * 10) % 10 === 0)) {
+                    beep(440, 0.05);
+                }
+
+                if (timeLeft <= 0) {
+                    beep(880, 0.5); // 切り替え音
+                    if (isWorking) {
+                        isWorking = false;
+                        timeLeft = 7;
+                        document.getElementById('status').innerText = "休憩中";
+                    } else {
+                        isWorking = true;
+                        timeLeft = 30;
+                        document.getElementById('status').innerText = "ワーク中";
+                    }
+                }
+                document.getElementById('timer').innerText = timeLeft.toFixed(1);
+            }, 100);
+        };
+    </script>
+</body>
+</html>
