@@ -1,67 +1,334 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h1 id="status">停止中</h1>
-    <h2 id="timer">30.0</h2>
-    <button id="btn" style="padding:20px; font-size:20px;">スタート</button>
-    <p>1 尻 足反対<p>
-    <p>2 尻 あぐら<p>
-    <p>3 片足 ももうら<p>
-    <p>4 45度 内転筋<p>
-    <p>5 両足 ももうら<p>
-    <p>6 脚真横 同じ手<p>
-    <p>7 脚真横 反対手<p>
-    <p>8 両足 合わせ<p>
-    <p>9 開脚ほぐし<p>
-    <p>10 開脚肘<p>
-    <p>11 開脚<p>
-    
-    <script>
-        let timeLeft = 30;
-        let isWorking = true;
-        let timerId = null;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function beep(f, d) {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.connect(g); g.connect(audioCtx.destination);
-            o.frequency.value = f;
-            g.gain.setValueAtTime(1.0, audioCtx.currentTime);
-            o.start(); o.stop(audioCtx.currentTime + d);
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストレッチタイマー</title>
+    <style>
+        :root {
+            --primary-color: #333;
+            --work-color: #e74c3c;  /* ワーク中の色（赤） */
+            --rest-color: #2ecc71;  /* 休憩中の色（緑） */
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
         }
 
-        document.getElementById('btn').onclick = function() {
-            if (timerId) return; // 二重起動防止
-            audioCtx.resume();
-            beep(660, 0.2); // 動作確認用の音
-            
-            this.innerText = "実行中...";
-            document.getElementById('status').innerText = "ワーク中";
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
 
-            timerId = setInterval(() => {
-                timeLeft = Math.round((timeLeft - 0.1) * 10) / 10;
-                
-                // 3秒前からのカウントダウン音
-                if (isWorking && [3, 2, 1].includes(Math.ceil(timeLeft)) && (Math.round(timeLeft * 10) % 10 === 0)) {
-                    beep(440, 0.05);
-                }
+        .container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-                if (timeLeft <= 0) {
-                    beep(880, 0.5); // 切り替え音
-                    if (isWorking) {
-                        isWorking = false;
-                        timeLeft = 7;
-                        document.getElementById('status').innerText = "休憩中";
-                    } else {
-                        isWorking = true;
-                        timeLeft = 30;
-                        document.getElementById('status').innerText = "ワーク中";
-                    }
-                }
-                document.getElementById('timer').innerText = timeLeft.toFixed(1);
-            }, 100);
+        h1#status {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #888;
+            font-weight: normal;
+        }
+
+        #timer {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            font-variant-numeric: tabular-nums; /* 数字の幅を等しくする */
+        }
+
+        /* 状態ごとの色変化 */
+        .state-stopped #timer { color: var(--primary-color); }
+        .state-work #timer { color: var(--work-color); }
+        .state-rest #timer { color: var(--rest-color); }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            outline: none;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.paused {
+            opacity: 0.7;
+        }
+
+        .exercise-list {
+            text-align: left;
+            margin-top: 20px;
+            padding: 0;
+            list-style: none;
+            border-top: 1px solid #eee;
+        }
+
+        .exercise-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            color: #aaa;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .exercise-item.active {
+            color: var(--primary-color);
+            background-color: #f0f0f0;
+            font-weight: bold;
+            border-left: 5px solid var(--work-color);
+        }
+
+        .badge {
+            font-size: 0.8em;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container state-stopped" id="app-container">
+        <h1 id="status">準備完了</h1>
+        <div id="timer">30.0</div>
+        <button id="btn">スタート</button>
+
+        <ul class="exercise-list" id="exercise-list"></ul>
+    </div>
+
+    <script>
+        // 設定データ
+        const CONFIG = {
+            workTime: 30,
+            restTime: 7,
+            exercises: [
+                "尻 足反対",
+                "尻 足反対 逆",
+                "尻 あぐら",                
+                "尻 あぐら 逆",
+                "片足 ももうら",
+                "片足 ももうら 逆",
+                "45度 内転筋",
+                "45度 内転筋 逆",
+                "両足 ももうら",
+                "脚真横 同じ手",
+                "脚真横 同じ手 逆",
+                "脚真横 反対手",
+                "脚真横 反対手 逆",
+                "両足 合わせ",
+                "開脚ほぐし",
+                "開脚肘",
+                "開脚",
+                "開脚 ２"
+            ]
         };
+
+        // アプリケーションの状態管理
+        const state = {
+            timerId: null,
+            timeLeft: CONFIG.workTime,
+            isWorking: true,  // true: ワーク中, false: 休憩中
+            isRunning: false, // タイマーが動いているか
+            currentSet: 0     // 現在のセット番号 (0〜10)
+        };
+
+        // DOM要素
+        const els = {
+            container: document.getElementById('app-container'),
+            status: document.getElementById('status'),
+            timer: document.getElementById('timer'),
+            btn: document.getElementById('btn'),
+            list: document.getElementById('exercise-list')
+        };
+
+        // 音声コンテキスト
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // ---------------------------------------------------------
+        // 初期化処理
+        // ---------------------------------------------------------
+        function init() {
+            renderList();
+            updateDisplay();
+            
+            els.btn.onclick = toggleTimer;
+        }
+
+        // リストの描画
+        function renderList() {
+            els.list.innerHTML = CONFIG.exercises.map((text, index) => `
+                <li class="exercise-item" id="item-${index}">
+                    <span>${index + 1}. ${text}</span>
+                    ${index === 0 ? '<span class="badge">Next</span>' : ''}
+                </li>
+            `).join('');
+            updateActiveItem();
+        }
+
+        // ---------------------------------------------------------
+        // タイマーロジック
+        // ---------------------------------------------------------
+        function toggleTimer() {
+            // AudioContextの再開（ブラウザ制限対策）
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (state.isRunning) {
+                // 一時停止処理
+                clearInterval(state.timerId);
+                state.isRunning = false;
+                els.btn.innerText = "再開";
+                els.btn.classList.add('paused');
+            } else {
+                // 開始・再開処理
+                if (state.timerId === null) {
+                    beep(660, 0.2); // 初回開始音
+                }
+                
+                state.isRunning = true;
+                els.btn.innerText = "一時停止";
+                els.btn.classList.remove('paused');
+                
+                // 100msごとに実行
+                state.timerId = setInterval(tick, 100);
+            }
+        }
+
+        function tick() {
+            state.timeLeft = Math.round((state.timeLeft - 0.1) * 10) / 10;
+            
+            // カウントダウン音 (3, 2, 1秒前)
+            if (state.isWorking && [3, 2, 1].includes(Math.ceil(state.timeLeft)) && (Math.round(state.timeLeft * 10) % 10 === 0)) {
+                beep(440, 0.05);
+            }
+
+            // タイマー終了時の処理
+            if (state.timeLeft <= 0) {
+                switchPhase();
+            }
+
+            updateDisplay();
+        }
+
+        function switchPhase() {
+            beep(880, 0.5); // 切り替え音
+
+            if (state.isWorking) {
+                // ワーク終了 -> 休憩へ
+                state.isWorking = false;
+                state.timeLeft = CONFIG.restTime;
+            } else {
+                // 休憩終了 -> 次のワークへ
+                state.isWorking = true;
+                state.timeLeft = CONFIG.workTime;
+                state.currentSet++;
+
+                // 全セット終了チェック
+                if (state.currentSet >= CONFIG.exercises.length) {
+                    finishWorkout();
+                    return;
+                }
+            }
+            updateActiveItem();
+        }
+
+        function finishWorkout() {
+            clearInterval(state.timerId);
+            state.isRunning = false;
+            state.timerId = null;
+            state.timeLeft = 0;
+            els.status.innerText = "完了！お疲れ様でした";
+            els.timer.innerText = "FINISH";
+            els.btn.innerText = "最初から";
+            els.container.className = "container state-stopped";
+            beep(1000, 0.8);
+            
+            // リセット処理
+            state.currentSet = 0;
+            state.isWorking = true;
+            state.timeLeft = CONFIG.workTime;
+            updateActiveItem();
+        }
+
+        // ---------------------------------------------------------
+        // 表示更新
+        // ---------------------------------------------------------
+        function updateDisplay() {
+            if (!state.isRunning && state.timerId === null) return; // 完了時は更新しない
+
+            els.timer.innerText = state.timeLeft.toFixed(1);
+            
+            if (state.isWorking) {
+                els.status.innerText = `ワーク中 (${state.currentSet + 1}/${CONFIG.exercises.length})`;
+                els.container.className = "container state-work";
+            } else {
+                els.status.innerText = "休憩中 (次は: " + CONFIG.exercises[state.currentSet + 1].split(' ')[0] + ")";
+                els.container.className = "container state-rest";
+            }
+        }
+
+        function updateActiveItem() {
+            // 全てのアイテムのactiveクラスを削除
+            document.querySelectorAll('.exercise-item').forEach(el => {
+                el.classList.remove('active');
+                const badge = el.querySelector('.badge');
+                if(badge) badge.remove();
+            });
+
+            // 現在のアイテムをハイライト
+            const currentEl = document.getElementById(`item-${state.currentSet}`);
+            if (currentEl) {
+                currentEl.classList.add('active');
+                currentEl.insertAdjacentHTML('beforeend', '<span class="badge">Now</span>');
+                
+                // スクロールして表示位置を調整
+                if(state.currentSet > 2) {
+                    currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 音声ユーティリティ
+        // ---------------------------------------------------------
+        function beep(freq, duration) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(1.0, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            o.start();
+            o.stop(audioCtx.currentTime + duration);
+        }
+
+        // 実行
+        init();
+
     </script>
 </body>
 </html>
