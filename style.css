@@ -1,0 +1,148 @@
+:root {
+  --primary-color: #333;
+  --work-color: #e74c3c; /* ワーク中の色（赤） */
+  --rest-color: #2ecc71; /* 休憩中の色（緑） */
+  --bg-color: #f4f4f9;
+  --card-bg: #ffffff;
+}
+
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.container {
+  background: var(--card-bg);
+  padding: 0;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+h1#status {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #888;
+  font-weight: normal;
+  padding: 1.5rem 2rem 0 2rem;
+}
+
+#timer {
+  font-size: 5rem;
+  font-weight: bold;
+  margin: 10px 0 20px 0;
+  font-variant-numeric: tabular-nums; /* 数字の幅を等しくする */
+  padding: 0 2rem;
+  flex-shrink: 0;
+}
+
+/* 状態ごとの色変化 */
+.state-stopped #timer {
+  color: var(--primary-color);
+}
+.state-work #timer {
+  color: var(--work-color);
+}
+.state-rest #timer {
+  color: var(--rest-color);
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    opacity 0.2s;
+  outline: none;
+  width: calc(100% - 80px);
+  margin: 20px 40px;
+  flex-shrink: 0;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button.paused {
+  opacity: 0.7;
+}
+
+.exercise-list {
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #eee;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.exercise-item {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  color: #aaa;
+  transition: all 0.3s;
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.exercise-item.active {
+  color: var(--primary-color);
+  background-color: #f0f0f0;
+  font-weight: bold;
+  border-left: 5px solid var(--work-color);
+}
+
+.badge {
+  font-size: 0.8em;
+  background: #eee;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.exercise-list-inner {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#paused-message {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 40px 60px;
+  border-radius: 20px;
+  z-index: 100;
+  text-align: center;
+}
+
+#paused-message.show {
+  display: block;
+}
