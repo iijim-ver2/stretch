@@ -68,6 +68,13 @@
             margin-bottom: 20px;
         }
 
+        button#pip-btn {
+            background-color: #7f8c8d;
+            margin-top: -10px;
+            font-size: 1rem;
+            padding: 10px 20px;
+        }
+
         button:active {
             transform: scale(0.98);
         }
@@ -114,9 +121,14 @@
         <h1 id="status">準備完了</h1>
         <div id="timer">30.0</div>
         <button id="btn">スタート</button>
+        <button id="pip-btn">PiPモード</button>
 
         <ul class="exercise-list" id="exercise-list"></ul>
     </div>
+
+    <!-- PiP用隠し要素 -->
+    <canvas id="pip-canvas" width="400" height="400" style="display:none;"></canvas>
+    <video id="pip-video" autoplay muted playsinline style="display:none;"></video>
 
     <script>
         // 設定データ
@@ -160,7 +172,10 @@
             status: document.getElementById('status'),
             timer: document.getElementById('timer'),
             btn: document.getElementById('btn'),
-            list: document.getElementById('exercise-list')
+            list: document.getElementById('exercise-list'),
+            pipBtn: document.getElementById('pip-btn'),
+            pipCanvas: document.getElementById('pip-canvas'),
+            pipVideo: document.getElementById('pip-video')
         };
 
         // 音声コンテキスト
@@ -174,6 +189,31 @@
             updateDisplay();
             
             els.btn.onclick = toggleTimer;
+
+            // PiPの初期化
+            if ('pictureInPictureEnabled' in document) {
+                els.pipBtn.onclick = togglePiP;
+                // 最初の一コマを描画
+                updatePipCanvas();
+                const stream = els.pipCanvas.captureStream(10); // 10fps
+                els.pipVideo.srcObject = stream;
+                els.pipVideo.onloadedmetadata = () => els.pipVideo.play();
+            } else {
+                els.pipBtn.style.display = "none";
+            }
+        }
+
+        async function togglePiP() {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await els.pipVideo.play();
+                    await els.pipVideo.requestPictureInPicture();
+                }
+            } catch (error) {
+                console.error("PiP error:", error);
+            }
         }
 
         // リストの描画
@@ -270,14 +310,19 @@
             state.currentSet = 0;
             state.isWorking = true;
             state.timeLeft = CONFIG.workTime;
+            
             updateActiveItem();
+            updatePipCanvas(); // PiP画面を更新
         }
 
         // ---------------------------------------------------------
         // 表示更新
         // ---------------------------------------------------------
         function updateDisplay() {
-            if (!state.isRunning && state.timerId === null) return; // 完了時は更新しない
+            if (!state.isRunning && state.timerId === null) {
+                updatePipCanvas(); // 初期状態の描画
+                return;
+            }
 
             els.timer.innerText = state.timeLeft.toFixed(1);
             
@@ -285,8 +330,47 @@
                 els.status.innerText = `ワーク中 (${state.currentSet + 1}/${CONFIG.exercises.length})`;
                 els.container.className = "container state-work";
             } else {
-                els.status.innerText = "休憩中 (次は: " + CONFIG.exercises[state.currentSet + 1].split(' ')[0] + ")";
+                els.status.innerText = "休憩中 (次は: " + (CONFIG.exercises[state.currentSet + 1] ? CONFIG.exercises[state.currentSet + 1].split(' ')[0] : '終了') + ")";
                 els.container.className = "container state-rest";
+            }
+            updatePipCanvas();
+        }
+
+        function updatePipCanvas() {
+            const ctx = els.pipCanvas.getContext('2d');
+            const w = els.pipCanvas.width;
+            const h = els.pipCanvas.height;
+
+            // 背景色決定
+            let bgColor = "#333"; // 停止中
+            if (state.isRunning || state.timerId !== null) {
+                bgColor = state.isWorking ? "#e74c3c" : "#2ecc71";
+            }
+            
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, w, h);
+
+            // テキスト描画
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            // ステータス
+            ctx.font = "24px sans-serif";
+            ctx.fillText(els.status.innerText, w / 2, 60);
+
+            // タイマー (FINISH の場合はフォントサイズ調整)
+            const isFinish = els.timer.innerText === "FINISH";
+            ctx.font = isFinish ? "bold 70px sans-serif" : "bold 100px sans-serif";
+            ctx.fillText(els.timer.innerText, w / 2, h / 2);
+
+            // 種目
+            if (!isFinish) {
+                ctx.font = "32px sans-serif";
+                const exercise = CONFIG.exercises[state.currentSet] || "";
+                if (exercise) {
+                    ctx.fillText(`${state.currentSet + 1}. ${exercise}`, w / 2, h - 80);
+                }
             }
         }
 
