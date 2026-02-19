@@ -41,6 +41,9 @@ const els = {
   btn: document.getElementById("btn"),
   list: document.getElementById("exercise-list"),
   pausedMessage: document.getElementById("paused-message"),
+  pipBtn: document.getElementById("pip-btn"),
+  pipCanvas: document.getElementById("pip-canvas"),
+  pipVideo: document.getElementById("pip-video"),
 };
 
 // 音声コンテキスト
@@ -54,6 +57,12 @@ function init() {
   updateDisplay();
 
   els.btn.onclick = toggleTimer;
+  els.pipBtn.onclick = togglePiP;
+
+  // PiP終了時のイベント
+  els.pipVideo.addEventListener("leavepictureinpicture", () => {
+    els.pipBtn.innerText = "PiPで表示";
+  });
 }
 
 // リストの描画
@@ -99,6 +108,7 @@ function toggleTimer() {
     // 100msごとに実行
     state.timerId = setInterval(tick, 100);
   }
+  updateDisplay();
 }
 
 function tick() {
@@ -165,7 +175,10 @@ function finishWorkout() {
 // 表示更新
 // ---------------------------------------------------------
 function updateDisplay() {
-  if (!state.isRunning && state.timerId === null) return; // 完了時は更新しない
+  if (!state.isRunning && state.timerId === null) {
+    updateCanvas();
+    return;
+  }
 
   els.timer.innerText = state.timeLeft.toFixed(1);
 
@@ -183,11 +196,12 @@ function updateDisplay() {
     } else {
       els.status.innerText =
         "休憩中 (次は: " +
-        CONFIG.exercises[state.currentSet + 1].split(" ")[0] +
+        (CONFIG.exercises[state.currentSet + 1] ? CONFIG.exercises[state.currentSet + 1].split(" ")[0] : "終了") +
         ")";
       els.container.className = "container state-rest";
     }
   }
+  updateCanvas();
 }
 
 function updateActiveItem() {
@@ -207,6 +221,71 @@ function updateActiveItem() {
     // スクロールして表示位置を調整
     currentEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
+}
+
+// ---------------------------------------------------------
+// PiP (Picture-in-Picture) 処理
+// ---------------------------------------------------------
+async function togglePiP() {
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+    } else {
+      // キャンバスをストリームに変換
+      const stream = els.pipCanvas.captureStream(10);
+      els.pipVideo.srcObject = stream;
+      await els.pipVideo.play();
+      await els.pipVideo.requestPictureInPicture();
+      els.pipBtn.innerText = "PiPを終了";
+      updateCanvas();
+    }
+  } catch (error) {
+    console.error("PiP error:", error);
+    alert("このブラウザはPiPに対応していないか、エラーが発生しました。");
+  }
+}
+
+function updateCanvas() {
+  const ctx = els.pipCanvas.getContext("2d");
+  const w = els.pipCanvas.width;
+  const h = els.pipCanvas.height;
+
+  // 背景色
+  let bgColor = "#f4f4f9";
+  let textColor = "#333";
+  if (state.isRunning || state.timerId !== null) {
+    if (state.isWorking) {
+      bgColor = "#e74c3c"; // ワーク色
+      textColor = "#fff";
+    } else {
+      bgColor = "#2ecc71"; // 休憩色
+      textColor = "#fff";
+    }
+  }
+  if (!state.isRunning && state.timerId !== null) {
+    bgColor = "#888"; // 一時停止
+    textColor = "#fff";
+  }
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, w, h);
+
+  // テキスト描画
+  ctx.fillStyle = textColor;
+  ctx.textAlign = "center";
+
+  // タイマー
+  ctx.font = "bold 100px sans-serif";
+  ctx.fillText(els.timer.innerText, w / 2, h / 2 + 20);
+
+  // ステータス（上部）
+  ctx.font = "30px sans-serif";
+  ctx.fillText(els.status.innerText, w / 2, 80);
+
+  // 種目名（下部）
+  const exercise = CONFIG.exercises[state.currentSet] || "完了";
+  ctx.font = "bold 40px sans-serif";
+  ctx.fillText(exercise, w / 2, h - 60);
 }
 
 // ---------------------------------------------------------
