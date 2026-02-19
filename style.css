@@ -1,7 +1,7 @@
 :root {
   --primary-color: #333;
   --work-color: #e74c3c; /* ワーク中の色（赤） */
-  --rest-color: #2ecc71; /* 休憩中の色（緑） */
+  --rest-color: #2ecc71; /* 休憩中の（緑） */
   --bg-color: #f4f4f9;
   --card-bg: #ffffff;
 }

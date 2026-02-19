@@ -135,7 +135,7 @@ function switchPhase() {
   beep(880, 0.5); // 切り替え音
 
   if (state.isWorking) {
-    // ワーク終了 -> 休憩へ
+    // ワーク終了 -> 休憩
     state.isWorking = false;
     state.timeLeft = CONFIG.restTime;
   } else {
