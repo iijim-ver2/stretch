@@ -126,23 +126,3 @@ button.paused {
   display: flex;
   flex-direction: column;
 }
-
-#paused-message {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2.5rem;
-  font-weight: bold;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 40px 60px;
-  border-radius: 20px;
-  z-index: 100;
-  text-align: center;
-}
-
-#paused-message.show {
-  display: block;
-}
