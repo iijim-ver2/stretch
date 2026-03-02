@@ -39,8 +39,9 @@ const els = {
   status: document.getElementById("status"),
   timer: document.getElementById("timer"),
   btn: document.getElementById("btn"),
+  skipBtn: document.getElementById("skip-btn"),
+  shareBtn: document.getElementById("share-btn"),
   list: document.getElementById("exercise-list"),
-  pausedMessage: document.getElementById("paused-message"),
   pipBtn: document.getElementById("pip-btn"),
   pipCanvas: document.getElementById("pip-canvas"),
   pipVideo: document.getElementById("pip-video"),
@@ -57,7 +58,9 @@ function init() {
   updateDisplay();
 
   els.btn.onclick = toggleTimer;
+  els.skipBtn.onclick = skipPhase;
   els.pipBtn.onclick = togglePiP;
+  els.shareBtn.onclick = shareOnTwitter;
 
   // PiP終了時のイベント
   els.pipVideo.addEventListener("leavepictureinpicture", () => {
@@ -83,6 +86,12 @@ function renderList() {
 // ---------------------------------------------------------
 // タイマーロジック
 // ---------------------------------------------------------
+function skipPhase() {
+  if (state.timerId === null && !state.isRunning) return;
+  switchPhase();
+  updateDisplay();
+}
+
 function toggleTimer() {
   // AudioContextの再開（ブラウザ制限対策）
   if (audioCtx.state === "suspended") {
@@ -99,6 +108,8 @@ function toggleTimer() {
     // 開始・再開処理
     if (state.timerId === null) {
       beep(660, 0.2); // 初回開始音
+      els.shareBtn.style.display = "none";
+      els.skipBtn.style.display = "block";
     }
 
     state.isRunning = true;
@@ -162,6 +173,8 @@ function finishWorkout() {
   els.timer.innerText = "FINISH";
   els.btn.innerText = "最初から";
   els.container.className = "container state-stopped";
+  els.shareBtn.style.display = "block";
+  els.skipBtn.style.display = "none";
   beep(1000, 0.8);
 
   // リセット処理
@@ -169,6 +182,13 @@ function finishWorkout() {
   state.isWorking = true;
   state.timeLeft = CONFIG.workTime;
   updateActiveItem();
+}
+
+function shareOnTwitter() {
+  const text = encodeURIComponent(`ストレッチを完了しました！ #${CONFIG.exercises.length}種類のメニューをこなしました。 #ストレッチタイマー`);
+  const url = encodeURIComponent(window.location.href);
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+  window.open(twitterUrl, "_blank");
 }
 
 // ---------------------------------------------------------
@@ -182,24 +202,15 @@ function updateDisplay() {
 
   els.timer.innerText = state.timeLeft.toFixed(1);
 
-  if (!state.isRunning && state.timerId !== null) {
-    // 一時停止中
-    els.pausedMessage.innerText = "一時停止中です";
-    els.pausedMessage.classList.add("show");
-    els.status.innerText = "一時停止中です";
-    els.container.className = "container state-stopped";
+  if (state.isWorking) {
+    els.status.innerText = `ワーク中 (${state.currentSet + 1}/${CONFIG.exercises.length})`;
+    els.container.className = "container state-work";
   } else {
-    els.pausedMessage.classList.remove("show");
-    if (state.isWorking) {
-      els.status.innerText = `ワーク中 (${state.currentSet + 1}/${CONFIG.exercises.length})`;
-      els.container.className = "container state-work";
-    } else {
-      els.status.innerText =
-        "休憩中 (次は: " +
-        (CONFIG.exercises[state.currentSet + 1] ? CONFIG.exercises[state.currentSet + 1].split(" ")[0] : "終了") +
-        ")";
-      els.container.className = "container state-rest";
-    }
+    els.status.innerText =
+      "休憩中 (次は: " +
+      (CONFIG.exercises[state.currentSet + 1] ? CONFIG.exercises[state.currentSet + 1].split(" ")[0] : "終了") +
+      ")";
+    els.container.className = "container state-rest";
   }
   updateCanvas();
 }
@@ -261,10 +272,6 @@ function updateCanvas() {
       bgColor = "#2ecc71"; // 休憩色
       textColor = "#fff";
     }
-  }
-  if (!state.isRunning && state.timerId !== null) {
-    bgColor = "#888"; // 一時停止
-    textColor = "#fff";
   }
 
   ctx.fillStyle = bgColor;

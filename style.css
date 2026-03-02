@@ -6,6 +6,10 @@
   --card-bg: #ffffff;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: "Helvetica Neue", Arial, sans-serif;
   background-color: var(--bg-color);
@@ -15,8 +19,7 @@ body {
   align-items: center;
   min-height: 100vh;
   margin: 0;
-  padding: 20px;
-  overflow: hidden;
+  padding: 10px;
 }
 
 .container {
@@ -25,29 +28,44 @@ body {
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   text-align: center;
-  max-height: 90vh;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: max-width 0.3s;
+}
+
+/* PCサイズ */
+@media (min-width: 600px) {
+  .container {
+    max-width: 600px;
+  }
+  #timer {
+    font-size: 8rem;
+  }
+  h1#status {
+    font-size: 2rem;
+  }
 }
 
 h1#status {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: #888;
   font-weight: normal;
-  padding: 1.5rem 2rem 0 2rem;
+  padding: 1rem 1rem 0 1rem;
 }
 
 #timer {
-  font-size: 5rem;
+  font-size: 4rem;
   font-weight: bold;
-  margin: 10px 0 20px 0;
-  font-variant-numeric: tabular-nums; /* 数字の幅を等しくする */
-  padding: 0 2rem;
+  margin: 10px 0;
+  font-variant-numeric: tabular-nums;
+  padding: 0 1rem;
   flex-shrink: 0;
+  transition: font-size 0.3s;
 }
 
 /* 状態ごとの色変化 */
@@ -65,16 +83,16 @@ button {
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 15px 40px;
-  font-size: 1.2rem;
+  padding: 12px 20px;
+  font-size: 1.1rem;
   border-radius: 50px;
   cursor: pointer;
   transition:
     transform 0.1s,
     opacity 0.2s;
   outline: none;
-  width: calc(100% - 80px);
-  margin: 20px 40px;
+  width: calc(100% - 40px);
+  margin: 10px 20px;
   flex-shrink: 0;
 }
 
@@ -98,7 +116,7 @@ button.paused {
 }
 
 .exercise-item {
-  padding: 10px 15px;
+  padding: 12px 15px;
   border-bottom: 1px solid #eee;
   color: #aaa;
   transition: all 0.3s;
@@ -125,24 +143,4 @@ button.paused {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-}
-
-#paused-message {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2.5rem;
-  font-weight: bold;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 40px 60px;
-  border-radius: 20px;
-  z-index: 100;
-  text-align: center;
-}
-
-#paused-message.show {
-  display: block;
 }
