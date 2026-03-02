@@ -204,13 +204,21 @@ function updateDisplay() {
 
   if (state.isWorking) {
     els.status.innerText = `ワーク中 (${state.currentSet + 1}/${CONFIG.exercises.length})`;
+temp-fix
     els.container.className = "container state-work";
+=======
+    els.container.className = state.isRunning ? "container state-work" : "container state-stopped";
+main
   } else {
     els.status.innerText =
       "休憩中 (次は: " +
       (CONFIG.exercises[state.currentSet + 1] ? CONFIG.exercises[state.currentSet + 1].split(" ")[0] : "終了") +
       ")";
+temp-fix
     els.container.className = "container state-rest";
+=======
+    els.container.className = state.isRunning ? "container state-rest" : "container state-stopped";
+main
   }
   updateCanvas();
 }
@@ -282,17 +290,17 @@ function updateCanvas() {
   ctx.textAlign = "center";
 
   // タイマー
-  ctx.font = "bold 100px sans-serif";
-  ctx.fillText(els.timer.innerText, w / 2, h / 2 + 20);
+  ctx.font = "bold " + (w * 0.3) + "px sans-serif";
+  ctx.fillText(els.timer.innerText, w / 2, h / 2 + (h * 0.1));
 
   // ステータス（上部）
-  ctx.font = "30px sans-serif";
-  ctx.fillText(els.status.innerText, w / 2, 80);
+  ctx.font = "bold " + (w * 0.1) + "px sans-serif";
+  ctx.fillText(els.status.innerText, w / 2, (h * 0.25));
 
   // 種目名（下部）
   const exercise = CONFIG.exercises[state.currentSet] || "完了";
-  ctx.font = "bold 40px sans-serif";
-  ctx.fillText(exercise, w / 2, h - 60);
+  ctx.font = "bold " + (w * 0.15) + "px sans-serif";
+  ctx.fillText(exercise, w / 2, h - (h * 0.12));
 }
 
 // ---------------------------------------------------------
