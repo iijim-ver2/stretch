@@ -1,7 +1,7 @@
 :root {
   --primary-color: #333;
-  --work-color: #e74c3c; /* ワーク中の色（赤） */
-  --rest-color: #2ecc71; /* 休憩中の（緑） */
+  --work-color: #e74c3c;
+  --rest-color: #2ecc71;
   --bg-color: #f4f4f9;
   --card-bg: #ffffff;
 }
@@ -34,20 +34,12 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: max-width 0.3s;
 }
 
-/* PCサイズ */
 @media (min-width: 600px) {
-  .container {
-    max-width: 600px;
-  }
-  #timer {
-    font-size: 8rem;
-  }
-  h1#status {
-    font-size: 2rem;
-  }
+  .container { max-width: 600px; }
+  #timer { font-size: 8rem; }
+  h1#status { font-size: 2rem; }
 }
 
 h1#status {
@@ -55,53 +47,54 @@ h1#status {
   font-size: 1.3rem;
   color: #888;
   font-weight: normal;
-  padding: 1rem 1rem 0 1rem;
+  padding: 1.5rem 1rem 0 1rem;
 }
 
 #timer {
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: bold;
   margin: 10px 0;
   font-variant-numeric: tabular-nums;
   padding: 0 1rem;
-  flex-shrink: 0;
-  transition: font-size 0.3s;
 }
 
-/* 状態ごとの色変化 */
-.state-stopped #timer {
-  color: var(--primary-color);
-}
-.state-work #timer {
-  color: var(--work-color);
-}
-.state-rest #timer {
-  color: var(--rest-color);
+.state-work #timer { color: var(--work-color); }
+.state-rest #timer { color: var(--rest-color); }
+
+.controls {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 button {
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 12px 20px;
-  font-size: 1.1rem;
+  padding: 15px 20px;
+  font-size: 1.2rem;
   border-radius: 50px;
   cursor: pointer;
-  transition:
-    transform 0.1s,
-    opacity 0.2s;
-  outline: none;
-  width: calc(100% - 40px);
+  transition: transform 0.1s, opacity 0.2s;
+  width: 100%;
+}
+
+button:active { transform: scale(0.98); }
+button.paused { opacity: 0.8; }
+
+.secondary-btn {
+  background: #555;
   margin: 10px 20px;
-  flex-shrink: 0;
+  width: calc(100% - 40px);
+  font-size: 1rem;
+  padding: 10px;
 }
 
-button:active {
-  transform: scale(0.98);
-}
-
-button.paused {
-  opacity: 0.7;
+.exercise-list-inner {
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+  flex: 1;
 }
 
 .exercise-list {
@@ -109,25 +102,19 @@ button.paused {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid #eee;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .exercise-item {
-  padding: 12px 15px;
+  padding: 12px 20px;
   border-bottom: 1px solid #eee;
   color: #aaa;
-  transition: all 0.3s;
   display: flex;
   justify-content: space-between;
-  flex-shrink: 0;
 }
 
 .exercise-item.active {
   color: var(--primary-color);
-  background-color: #f0f0f0;
+  background-color: #f9f9f9;
   font-weight: bold;
   border-left: 5px solid var(--work-color);
 }
@@ -137,10 +124,4 @@ button.paused {
   background: #eee;
   padding: 2px 8px;
   border-radius: 10px;
-}
-
-.exercise-list-inner {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
 }

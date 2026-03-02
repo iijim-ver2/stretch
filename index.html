@@ -10,30 +10,20 @@
     <div class="container state-stopped" id="app-container">
       <h1 id="status">準備完了です</h1>
       <div id="timer">30.0</div>
-      <button id="btn">スタート</button>
-      <button id="skip-btn" style="background: #f39c12; display: none;">スキップ</button>
-      <button id="share-btn" style="background: #1da1f2; display: none;">Twitterに投稿</button>
-      <button id="pip-btn" style="background: #555; margin-top: 0; font-size: 1rem; padding: 10px;">PiPで表示</button>
+      <div class="controls">
+        <button id="btn">スタート</button>
+        <button id="skip-btn" style="background: #f39c12; display: none;">スキップ</button>
+        <button id="share-btn" style="background: #1da1f2; display: none;">Twitterに投稿</button>
+      </div>
+      <button id="pip-btn" class="secondary-btn">PiPで表示</button>
 
       <div class="exercise-list-inner">
         <ul class="exercise-list" id="exercise-list"></ul>
       </div>
     </div>
 
-    <!-- PiP用隠し要素 -->
-    <canvas
-      id="pip-canvas"
-      width="200"
-      height="200"
-      style="display:none;"
-    ></canvas>
-    <video
-      id="pip-video"
-      autoplay
-      muted
-      playsinline
-      style="display:none;"
-    ></video>
+    <canvas id="pip-canvas" width="400" height="400" style="display:none;"></canvas>
+    <video id="pip-video" autoplay muted playsinline style="display:none;"></video>
 
     <script src="script.js"></script>
   </body>
