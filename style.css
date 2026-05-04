@@ -2,8 +2,14 @@
   --primary-color: #333;
   --work-color: #e74c3c;
   --rest-color: #2ecc71;
-  --bg-color: #f4f4f9;
-  --card-bg: #ffffff;
+  --skip-color: #f39c12;
+  --share-color: #1da1f2;
+  --secondary-bg: #555;
+  --border-color: #eee;
+}
+
+.hidden {
+  display: none !important;
 }
 
 * {
@@ -12,7 +18,7 @@
 }
 
 body {
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--primary-color);
   display: flex;
@@ -35,6 +41,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 @media (min-width: 600px) {
@@ -45,14 +52,14 @@ body {
 
 h1#status {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
   color: #888;
   font-weight: normal;
   padding: 1.5rem 1rem 0 1rem;
 }
 
 #timer {
-  font-size: 4.5rem;
+  font-size: clamp(4rem, 15vw, 6rem);
   font-weight: bold;
   margin: 10px 0;
   font-variant-numeric: tabular-nums;
@@ -77,15 +84,28 @@ button {
   font-size: 1.2rem;
   border-radius: 50px;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
+  transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
   width: 100%;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 
 button:active { transform: scale(0.98); }
 button.paused { opacity: 0.8; }
 
+.btn-skip {
+  background-color: var(--skip-color);
+}
+
+.btn-share {
+  background-color: var(--share-color);
+}
+
 .secondary-btn {
-  background: #555;
+  background: var(--secondary-bg);
   margin: 10px 20px;
   width: calc(100% - 40px);
   font-size: 1rem;
@@ -94,7 +114,7 @@ button.paused { opacity: 0.8; }
 
 .exercise-list-inner {
   overflow-y: auto;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
   flex: 1;
 }
 
@@ -107,10 +127,11 @@ button.paused { opacity: 0.8; }
 
 .exercise-item {
   padding: 12px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   color: #aaa;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .exercise-item.active {
@@ -122,7 +143,7 @@ button.paused { opacity: 0.8; }
 
 .badge {
   font-size: 0.8em;
-  background: #eee;
+  background: var(--border-color);
   padding: 2px 8px;
   border-radius: 10px;
 }

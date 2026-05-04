@@ -12,8 +12,8 @@
       <div id="timer">30.0</div>
       <div class="controls">
         <button id="btn">スタート</button>
-        <button id="skip-btn" style="background: #f39c12; display: none;">スキップ</button>
-        <button id="share-btn" style="background: #1da1f2; display: none;">Twitterに投稿</button>
+        <button id="skip-btn" class="btn-skip hidden">スキップ</button>
+        <button id="share-btn" class="btn-share hidden">Twitterに投稿</button>
       </div>
       <button id="pip-btn" class="secondary-btn">PiPで表示</button>
 
@@ -22,8 +22,8 @@
       </div>
     </div>
 
-    <canvas id="pip-canvas" width="400" height="400" style="display:none;"></canvas>
-    <video id="pip-video" autoplay muted playsinline style="display:none;"></video>
+    <canvas id="pip-canvas" width="400" height="400" class="hidden"></canvas>
+    <video id="pip-video" autoplay muted playsinline class="hidden"></video>
 
     <script src="script.js"></script>
   </body>
