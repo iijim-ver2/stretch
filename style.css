@@ -1,17 +1,24 @@
+/* =========================================
+   変数の定義
+   ========================================= */
 :root {
-  --primary-color: #333;
+  /* 色 */
+  --bg-color: #f4f4f9;
+  --card-bg: #ffffff;
+  --primary-color: #333333;
   --work-color: #e74c3c;
   --rest-color: #2ecc71;
   --skip-color: #f39c12;
   --share-color: #1da1f2;
-  --secondary-bg: #555;
-  --border-color: #eee;
+  --secondary-bg: #555555;
+  --border-color: #eeeeee;
+  --text-muted: #888888;
+  --text-light: #aaaaaa;
 }
 
-.hidden {
-  display: none !important;
-}
-
+/* =========================================
+   リセット & ベーススタイル
+   ========================================= */
 * {
   box-sizing: border-box;
   touch-action: manipulation;
@@ -29,121 +36,133 @@ body {
   padding: 10px;
 }
 
+/* =========================================
+   ユーティリティ
+   ========================================= */
+.hidden {
+  display: none !important;
+}
+
+/* =========================================
+   レイアウト
+   ========================================= */
 .container {
   background: var(--card-bg);
-  padding: 0;
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 500px;
-  text-align: center;
   max-height: 95vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  text-align: center;
   transition: background-color 0.3s ease;
 }
 
 @media (min-width: 600px) {
   .container { max-width: 600px; }
-  #timer { font-size: 8rem; }
-  h1#status { font-size: 2rem; }
+  .timer-text { font-size: 8rem !important; }
+  h1#status { font-size: 2rem !important; }
 }
 
+/* =========================================
+   コンポーネント: ディスプレイ
+   ========================================= */
 h1#status {
   margin: 0;
-  font-size: clamp(1.1rem, 4vw, 1.5rem);
-  color: #888;
-  font-weight: normal;
   padding: 1.5rem 1rem 0 1rem;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  color: var(--text-muted);
+  font-weight: normal;
 }
 
-#timer {
+.timer-text {
+  margin: 10px 0;
+  padding: 0 1rem;
   font-size: clamp(4rem, 15vw, 6rem);
   font-weight: bold;
-  margin: 10px 0;
   font-variant-numeric: tabular-nums;
-  padding: 0 1rem;
 }
 
-.state-work #timer { color: var(--work-color); }
-.state-rest #timer { color: var(--rest-color); }
+.state-work .timer-text { color: var(--work-color); }
+.state-rest .timer-text { color: var(--rest-color); }
 
-.controls {
+/* =========================================
+   コンポーネント: コントロールボタン
+   ========================================= */
+.controls-section {
   padding: 0 20px;
+}
+
+.main-controls {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 button {
+  width: 100%;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 50px;
   background-color: var(--primary-color);
   color: white;
-  border: none;
-  padding: 15px 20px;
   font-size: 1.2rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
-  width: 100%;
   font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
 }
 
-button:hover {
-  opacity: 0.9;
-}
-
+button:hover { opacity: 0.9; }
 button:active { transform: scale(0.98); }
-button.paused { opacity: 0.8; }
+button.is-paused { opacity: 0.8; }
 
-.btn-skip {
-  background-color: var(--skip-color);
-}
-
-.btn-share {
-  background-color: var(--share-color);
-}
-
-.secondary-btn {
-  background: var(--secondary-bg);
-  margin: 10px 20px;
+.btn-skip { background-color: var(--skip-color); }
+.btn-share { background-color: var(--share-color); }
+.btn-secondary {
+  background-color: var(--secondary-bg);
   width: calc(100% - 40px);
-  font-size: 1rem;
+  margin: 10px 20px;
   padding: 10px;
+  font-size: 1rem;
 }
 
-.exercise-list-inner {
-  overflow-y: auto;
-  border-top: 1px solid var(--border-color);
+/* =========================================
+   コンポーネント: リスト
+   ========================================= */
+.list-section {
   flex: 1;
+  border-top: 1px solid var(--border-color);
+  overflow-y: auto;
 }
 
 .exercise-list {
-  text-align: left;
   margin: 0;
   padding: 0;
   list-style: none;
+  text-align: left;
 }
 
 .exercise-item {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border-color);
-  color: #aaa;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-light);
 }
 
-.exercise-item.active {
-  color: var(--primary-color);
+.exercise-item.is-active {
   background-color: #f9f9f9;
-  font-weight: bold;
   border-left: 5px solid var(--work-color);
+  color: var(--primary-color);
+  font-weight: bold;
 }
 
 .badge {
-  font-size: 0.8em;
-  background: var(--border-color);
   padding: 2px 8px;
   border-radius: 10px;
+  background: var(--border-color);
+  font-size: 0.8em;
 }

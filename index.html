@@ -7,24 +7,31 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container state-stopped" id="app-container">
-      <h1 id="status">準備完了です</h1>
-      <div id="timer">30.0</div>
-      <div class="controls">
-        <button id="btn">スタート</button>
-        <button id="skip-btn" class="btn-skip hidden">スキップ</button>
-        <button id="share-btn" class="btn-share hidden">Twitterに投稿</button>
-      </div>
-      <button id="pip-btn" class="secondary-btn">PiPで表示</button>
+    <main class="container state-stopped" id="app-container">
+      <section class="display-section">
+        <h1 id="status">準備完了です</h1>
+        <div id="timer" class="timer-text">30.0</div>
+      </section>
 
-      <div class="exercise-list-inner">
+      <section class="controls-section">
+        <div class="main-controls">
+          <button id="btn-toggle">スタート</button>
+          <button id="btn-skip" class="btn-skip hidden">スキップ</button>
+          <button id="btn-share" class="btn-share hidden">Twitterに投稿</button>
+        </div>
+        <button id="btn-pip" class="btn-secondary">PiPで表示</button>
+      </section>
+
+      <section class="list-section">
         <ul class="exercise-list" id="exercise-list"></ul>
-      </div>
+      </section>
+    </main>
+
+    <div class="pip-resources hidden">
+      <canvas id="pip-canvas" width="400" height="400"></canvas>
+      <video id="pip-video" autoplay muted playsinline></video>
     </div>
 
-    <canvas id="pip-canvas" width="400" height="400" class="hidden"></canvas>
-    <video id="pip-video" autoplay muted playsinline class="hidden"></video>
-
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
