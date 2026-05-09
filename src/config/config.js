@@ -22,16 +22,3 @@ export const CONFIG = {
     "開脚2",
   ],
 };
-
-export const AUDIO = {
-  FREQ_START: 660,
-  FREQ_COUNTDOWN: 440,
-  FREQ_PHASE_CHANGE: 880,
-  FREQ_FINISH: 1000,
-};
-
-export const UI_STATE_CLASSES = {
-  STOPPED: "state-stopped",
-  WORK: "state-work",
-  REST: "state-rest",
-};
