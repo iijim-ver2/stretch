@@ -1,4 +1,6 @@
-export const CONFIG = {
+import type { StretchConfig } from "./types";
+
+export const CONFIG: StretchConfig = {
   workTime: 30,
   restTime: 7,
   exercises: [
