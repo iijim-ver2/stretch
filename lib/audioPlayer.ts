@@ -1,21 +1,31 @@
-import { AUDIO } from "../config/audio.js";
+import { AUDIO } from "./constants";
 
+/**
+ * Web Audio API を使ったビープ音の再生を担当するクラス。
+ * ユーザー操作後に init() を呼ぶことで AudioContext を起動する。
+ */
 export class AudioPlayer {
-  constructor() {
-    this.audioCtx = null;
-  }
+  private audioCtx: AudioContext | null = null;
 
-  init() {
+  init(): void {
     if (!this.audioCtx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.audioCtx = new AudioContext();
+      const Ctor =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctor) return;
+      this.audioCtx = new Ctor();
     }
     if (this.audioCtx.state === "suspended") {
-      this.audioCtx.resume();
+      void this.audioCtx.resume();
     }
   }
 
-  playCountdownSoundIfNeeded(isWorking, prevSeconds, currentSeconds) {
+  playCountdownSoundIfNeeded(
+    isWorking: boolean,
+    prevSeconds: number,
+    currentSeconds: number,
+  ): void {
     const secondChanged = currentSeconds !== prevSeconds;
     const isCountdownBeat = [3, 2, 1].includes(currentSeconds);
 
@@ -24,7 +34,7 @@ export class AudioPlayer {
     }
   }
 
-  playBeep(frequency, duration) {
+  playBeep(frequency: number, duration: number): void {
     if (!this.audioCtx) return;
 
     const oscillator = this.audioCtx.createOscillator();
